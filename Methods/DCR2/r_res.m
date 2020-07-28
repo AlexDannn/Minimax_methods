@@ -1,4 +1,4 @@
-% Вычисление приближающей рациональной функции в точке x.
+% Calculating the approximating function at the point x
 function [ val ] = r_res( x, a, b )
     top_val = 0;
     bot_val = 0;
