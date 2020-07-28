@@ -9,8 +9,8 @@
 * Базовый метод IRLS
 
 ### Список позаимствованных методов:
-* Алгоритм AAA-Лоусона [](https://arxiv.org/abs/1908.06001)
-* Комбинированный метод IRLS [](https://ieeexplore.ieee.org/document/330353)
+* Алгоритм AAA-Лоусона [Статья](https://arxiv.org/abs/1908.06001)
+* Комбинированный метод IRLS [Статья](https://ieeexplore.ieee.org/document/330353)
 
 
 <img src="images/1.jpg" alt="1" width="800"/>
