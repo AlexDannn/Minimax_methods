@@ -29,16 +29,16 @@ tic
  [r,pol,res,ZER, ZJ, FJ, WJ, ERRVEC, wt, mmErrors] = aaa(F24,X,'degree',22)
 times = vpa(toc)
 
-% График приближаемой и приближающей функции.
+
 figure(1)
 plot(X, F24(X),X, r(X), 'Linewidth', 2), set(gca,'FontSize',18), grid on
 legend('r(x)', 'f(x)'), grid on
-% График функции ошибки. 
+ 
 figure(2)
 plot(X, F24(X) - r(X)), set(gca,'FontSize',18)
 legend('Error function'),grid on
 
-% Значение ошибки на каждой итерации.  
+
 % n_iter = []; 
 % iter_err = [];
 % for i = 1:length(ERRVEC)
@@ -46,7 +46,7 @@ legend('Error function'),grid on
 %   iter_err = [iter_err; ERRVEC(i)];
 % end
 
-% Значения ошибок. 
+
 vpa(ERRVEC)
 
   
