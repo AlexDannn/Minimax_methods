@@ -7,44 +7,45 @@ from fpdf import FPDF
 import time 
 
 start_time = time.time()
+
 '''
-Классический алгоритм Ремеза.
-1)	Принимает:
-    а)	 Приближаемую функцию, заданную дискретно:
-        •	x – список, содержащий набор точек на интервале аппроксимации [-1, 1];
-        •	y – список, содержащий значения функции в точках списка x;
-    Количество точек формируется исходя из степени приближающего полинома n (n + 2); 
+The classical Remez algorithm.
+1) Accepts:
+a) Approximate function, given discretely:
+• x - a list containing a set of points on the approximation interval [-1, 1];
+• y - a list containing the values ​​of the function at points in the list x;
+The number of points is formed based on the degree of the approximating polynomial n (n + 2);
 
-    б)	n – целое число, обозначающее степень приближающего полинома.
+b) n is an integer denoting the degree of the approximating polynomial.
 
-2)	Возвращает:
-    а)	best_result_max – максимальное значение функции ошибки на интервале аппроксимации;
-    б)	График функции ошибки и график приближающей и приближаемой функции;
-    в)	b_coeff – коэффициенты полинома наилучшего приближения;
-    г)	iter_n – количество итераций, совершенных методом.
+2) Returns:
+a) best_result_max - the maximum value of the error function on the approximation interval;
+b) The graph of the error function and the graph of the approaching and approximating function;
+c) b_coeff - coefficients of the best approximation polynomial;
+d) iter_n - the number of iterations performed by the method.
 
 '''
 
 
 functions = {
-    # Периодические функции
+
     '1': lambda x: math.sin(2*x),
     '2': lambda x: math.sin(2.5*math.cos(x)),
     '3': lambda x: math.sin(x)*math.cos(x),
     '4': lambda x: math.cos(4*math.sin(x)),
     '5': lambda x: math.exp(math.sin(x)),
-    # Монотонные функции
+
     '6': lambda x: math.exp(x),
     '7': lambda x: math.sinh(x),
     '8': lambda x: math.atan(x),
     '9': lambda x: x**6,
-    # '10': lambda x: x**7+3*x**5+2*x-1,
+
     '11': lambda x: math.log(x+3),
-    # Дробно-рациональные функции
+
     '12': lambda x: 1/(x**2+1),
     '13': lambda x: (x**5+x**3+x)/(x**6+x**2+3),
     '14': lambda x: 1/(1+x+x**2),
-    # '15': lambda x: math.sin(x)/x, '''Избегать нуля! '''
+
     '16': lambda x: math.sin(x)/(x**2+1),
     '17': lambda x: (x**2+2)/(x**2+1),
     '18': lambda x: math.exp(-(x-1)**2/(2*.5**2)),
@@ -75,14 +76,12 @@ def Remez(n, formula, x_equiv=None):
         return formula(x)
 
     if x_equiv is None:
-        # Узлы Чебышева
         for i in range(n+2):
             x.append((a+b)/2+(b-a)/2*math.cos((math.pi*(n+1-i)/(n+1))))
             y.append(
                 func((a+b)/2+(b-a)/2*math.cos((math.pi*(n+1-i)/(n+1))),
                      formula))
     else:
-        # Равноудаленные узлы
         x = np.linspace(a, b, x_equiv)
         y = [func(i, formula) for i in x]
         n = x_equiv-2
@@ -105,14 +104,12 @@ def Remez(n, formula, x_equiv=None):
                 a_matr[i][j] = x[i]**j
             a_matr[i][len(x)-1] = (-1)**i
 
-        # print(a_matr, 'матрица')
-        b_coeff_E = np.linalg.solve(a_matr, m)  # Находим коэффициенты b  и E
+        b_coeff_E = np.linalg.solve(a_matr, m) 
         print(np.linalg.solve(a_matr, m))
         b_coeff = np.zeros(len(x))
         for i in range(len(x)):
             b_coeff[i] = b_coeff_E[i]
 
-        # print(b_coeff)
         print('NNNN ', n, 'l_x', len(x))
 
         def b_res(X, b_coeff):
@@ -122,13 +119,11 @@ def Remez(n, formula, x_equiv=None):
             return sum
 
         xnew = np.linspace(a, b, 1000)
-        y_func = [func(i, formula) for i in xnew]  # Значение функции
-        # Построение интерполянта Лагрнжа по n-1 точкам
+        y_func = [func(i, formula) for i in xnew]  
         ynew = [b_res(i, b_coeff) for i in xnew]
         y_diff = [b_res(i, b_coeff)-func(i, formula)
-                  for i in xnew]  # Разница между Лагранжом и функцией
+                  for i in xnew]
 
-        # Поиск экстремумов
         s = pd.Series(y_diff)
         grp = s.groupby((np.sign(s).diff().fillna(0).ne(0)).cumsum())
         extremums_y_n = grp.apply(
@@ -136,7 +131,6 @@ def Remez(n, formula, x_equiv=None):
         extremums_y = []
         print(len(extremums_y_n))
         for i in range(len(extremums_y_n)):
-            # print(i)
             if extremums_y_n.iloc[i] != 0:
                 extremums_y.append(extremums_y_n[i])
 
@@ -147,7 +141,6 @@ def Remez(n, formula, x_equiv=None):
         for i in xnew:
             if b_res(i, b_coeff)-func(i, formula) == extremums_y[it]:
                 extremums_x.append(i)
-                # print(it,' ',len(extremums_y),' ',extremums_y[it])
                 if it != (len(extremums_y)-1):
                     it += 1
                 else:
@@ -155,7 +148,6 @@ def Remez(n, formula, x_equiv=None):
 
         print(extremums_x, 'Экстремумы x')
         print('----------------')
-        # '''
 
         extremums_y_p = []
         extremums_y_n = []
@@ -180,7 +172,6 @@ def Remez(n, formula, x_equiv=None):
         if(len(extremums_y) >= n+2):
             print("@")
             for i in range(len(extremums_y)):
-                #  print(extremums_y[i],' ',max_E)
                 if math.fabs(extremums_y[i]) > max_E:
                     max_E = math.fabs(extremums_y[i])
                     local_max = i
@@ -190,7 +181,6 @@ def Remez(n, formula, x_equiv=None):
                         max_E_1 = max_E
 
             for i in range(len(extremums_y)):
-                # print(extremums_y[i],' ',min_E)
                 if math.fabs(extremums_y[i]) < min_E:
                     min_E = math.fabs(extremums_y[i])
                     local_min = i
@@ -249,11 +239,6 @@ def Remez(n, formula, x_equiv=None):
         if(Error < delta):
             print('Лучший результат за ', iter_n, ' итераций:', Error)
 
-    '''
-    print('Коэффициенты многочлена наилучшего приближения')
-    for i in range(n+1):
-        print(b_coeff[i], 'x^', i, end=' ')
-    '''
     print('Максимальное отклонение:', max(extremums_y))
     errvec.append(extremums_y[0])
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -265,9 +250,7 @@ def Remez(n, formula, x_equiv=None):
     return max(extremums_y)
 
 
-# -----------------------------------------------------------------------------#
-# Конец алгоритма Ремеза
-# -----------------------------------------------------------------------------#
+
 best_result_max = 1000
 
 for i in range(11, 12):
