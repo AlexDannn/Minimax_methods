@@ -10,41 +10,35 @@ import time
 start_time = time.time()
 
 '''
-Барицентрический метод:
-1)	Принимает:
-    а)	 Приближаемую функцию, заданную дискретно:
-        •	x – список, содержащий набор точек на интервале аппроксимации [-1, 1]; 
-        •	y – список, содержащий значения функции в точках вектора-столбца x;
-        Количество точек формируется исходя из введенных степеней числителя и знаменателя приближающей барицентрической функции n и n (2n + 2); 
-
-    б)	n – целое число, обозначающее степень числителя и знаменателя приближающей функции.
-
-2)	Возвращает:
-    а)	Error_func – максимальное значение функции ошибки на интервале аппроксимации;
-    б)	График функции ошибки и график приближающей и приближаемой функции;
-    в)	iter – количество итераций, совершенных методом.
+Barycentric method:
+1) Accepts:
+    a) Approximate function, given discretely:
+        • x - a list containing a set of points on the approximation interval [-1, 1];
+        • y - a list containing the values ​​of the function at the points of the column vector x;
+        The number of points is formed on the basis of the entered powers of the numerator and denominator of the approximating barycentric function n and n (2n + 2);
+    b) n is an integer denoting the degree of the numerator and denominator of the approximating function.
+2) Returns:
+    a) Error_func is the maximum value of the error function on the approximation interval;
+    b) The graph of the error function and the graph of the approaching and approximating function;
+    c) iter is the number of iterations performed by the method.
 '''
 
 
 functions = {
-    # Периодические функции
     '1': lambda x: math.sin(2*x),
     '2': lambda x: math.sin(2.5*math.cos(x)),
     '3': lambda x: math.sin(x)*math.cos(x),
     '4': lambda x: math.cos(4*math.sin(x)),
     '5': lambda x: math.exp(math.sin(x)),
-    # Монотонные функции
     '6': lambda x: math.exp(x),
     '7': lambda x: math.sinh(x),
     '8': lambda x: math.atan(x),
  '9': lambda x: x**6,
     # '10': lambda x: x**7+3*x**5+2*x-1,
     '11': lambda x: math.log(x+3),
-    # Дробно-рациональные функции
     '12': lambda x: 1/(x**2+1),
     '13': lambda x: (x**5+x**3+x)/(x**6+x**2+3),
     '14': lambda x: 1/(1+x+x**2),
-    # '15': lambda x: math.sin(x)/x, '''Избегать нуля! '''
     '16': lambda x: math.sin(x)/(x**2+1),
     '17': lambda x: (x**2+2)/(x**2+1),
     '18': lambda x: math.exp(-(x-1)**2/(2*.5**2)),
@@ -64,7 +58,6 @@ def Barycentric(n, formula, x_equiv=None):
 
     Delta = 1e-16
 
-    # Узлы Чебышева 
     def func(x, formula):
         return formula(x)
 
@@ -79,7 +72,6 @@ def Barycentric(n, formula, x_equiv=None):
         x = np.linspace(a, b, N)
         y = [func(i, formula) for i in x]
 
-    #print(x,' ',y)
     a_matr = np.zeros((N, N))
     y_matr = np.zeros(N)
     min_E = -1
@@ -138,16 +130,15 @@ def Barycentric(n, formula, x_equiv=None):
             return top/bottom
 
         xnew = np.linspace(a, b, 1000)
-        y_func = [func(i, formula) for i in xnew]  # Значение функции
-        # Построение интерполянта Лагрнжа по n-1 точкам
+        y_func = [func(i, formula) for i in xnew]
         ynew = [rat_res(i) for i in xnew]
         y_diff = [rat_res(i)-func(i, formula)
-                    for i in xnew]  # Разница между Лагранжом и функцией
+                    for i in xnew]
         
         extremums_x = []
         extremums_y = []
         y_diff = array(y_diff)
-        # Проверка на альтернанс
+        
         def check_for_alter(y_for_check):
             for i in range(len(y_for_check)-1):
                 if y_for_check[i]*y_for_check[i+1] >= 0:
@@ -155,7 +146,7 @@ def Barycentric(n, formula, x_equiv=None):
                     return False
             print("Alternant")
             return True
-        # Поиск экстремумов
+
         s = pd.Series(y_diff)
         grp = s.groupby((np.sign(s).diff().fillna(0).ne(0)).cumsum())
         extremums_y_n = grp.apply(
@@ -178,7 +169,7 @@ def Barycentric(n, formula, x_equiv=None):
 
         check_for_alter(extremums_y) 
 
-        # Удаление минимальных экстремумов 
+
         extremums_y_abs = extremums_y.copy()
         for i in range(len(extremums_y_abs)):
             extremums_y_abs[i] = abs(extremums_y_abs[i])
@@ -260,7 +251,6 @@ def Barycentric(n, formula, x_equiv=None):
         x_new = x.copy()
         result = list(set(x) & set(x_old))
         if len(result) == len(x):
-            print("Совпадение с предыдущими значениями")
             break
 
         E_0 = delta_start
