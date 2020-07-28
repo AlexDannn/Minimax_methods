@@ -8,50 +8,47 @@ from numpy import array
 import time 
 
 '''
-Дробно-рациональный метод Ремеза:
+Fractional rational Remez method:
 
-1)	Принимает:
-    a)	 Приближаемую функцию, заданную дискретно:
-        •	x – список, содержащий набор точек на интервале аппроксимации [-1, 1]; 
-        •	y – список, содержащий значения функции в точках вектора-столбца x;
-        Количество точек формируется исходя из введенных степеней числителя и знаменателя приближающей функции m и n (m + n + 2); 
+1) Accepts:
+a) Approximate function, given discretely:
+• x - a list containing a set of points on the approximation interval [-1, 1];
+• y - a list containing the values ​​of the function at the points of the column vector x;
+The number of points is formed based on the entered powers of the numerator and denominator of the approximating function m and n (m + n + 2);
 
-    б)	m и n – целые числа, обозначающие степени числителя и знаменателя приближающей функции.
+b) m and n are integers denoting the degrees of the numerator and denominator of the approximating function.
 
-2)	Возвращает:
-    а)	Error_func – максимальное значение функции ошибки на интервале аппроксимации;
-    б)	График функции ошибки и график приближающей и приближаемой функции;
-    в)	a_coeff, b_coeff – коэффициенты числителя и знаменателя приближающей функции;
-    г)	iter – количество итераций, совершенных методом.
+2) Returns:
+a) Error_func is the maximum value of the error function on the approximation interval;
+b) The graph of the error function and the graph of the approaching and approximating function;
+c) a_coeff, b_coeff are the coefficients of the numerator and denominator of the approximating function;
+d) iter is the number of iterations performed by the method.
 '''
 
 
 start_time = time.time()
 
 functions = {
-    # Периодические функции
    '1': lambda x: math.sin(25*x),
     '2': lambda x: math.sin(2.5*math.cos(x)),
     '3': lambda x: math.sin(x)*math.cos(x),
     '4': lambda x: math.cos(4*math.sin(x)),
     '5': lambda x: math.exp(math.sin(x)),
-    # Монотонные функции
     '6': lambda x: math.exp(x),
     '7': lambda x: math.sinh(x),
     '8': lambda x: math.atan(x),
     '9': lambda x: x**6,
-    # '10': lambda x: x**7+3*x**5+2*x-1,
     '11': lambda x: math.log(x+3),
-    # Дробно-рациональные функции
+
     '12': lambda x: 1/(x**2+1),
     '13': lambda x: (x**5+x**3+x)/(x**6+x**2+3),
     '14': lambda x: 1/(1+x+x**2),
-    # '15': lambda x: math.sin(x)/x, '''Избегать нуля! '''
+
     '16': lambda x: math.sin(x)/(x**2+1),
     '17': lambda x: (x**2+2)/(x**2+1),
     '18': lambda x: math.exp(-(x+1)**2)/(4*(x)**2 +  1.1),
     '19': lambda x: max(math.sin(20*x), math.exp(x-1)),
-    #'19': lambda x: 1 if (x > 0 and x < 0.4) else  0
+
     '20': lambda x: math.tanh(50*x),
     '21': lambda x: math.tanh(x+0.5) - math.tanh(x-0.5),
     '22': lambda x: 1 - math.sin(5*abs(x - 0.5)),
@@ -92,8 +89,6 @@ def Rat_Remez(m, n, formula, x_equiv=None):
     else:
         x = np.linspace(a, b, N)
         y = [func(i, formula) for i in x]
-
-    #print(x,' ',y)
     a_matr = np.zeros((N, N))
     y_matr = np.zeros(N)
     min_E = -1
@@ -114,21 +109,14 @@ def Rat_Remez(m, n, formula, x_equiv=None):
         a_b_E_coeff = np.linalg.solve(a_matr, y_matr)
         print("Начальные точки: ")
         print(x)
-        #print(a_matr)
-        #print('----------')
-        #print(y)
-        #print('----------')
-        #print('a_b_E_coeff: ',a_b_E_coeff)
-        #b_coeff[0] = 1
+
         for i in range(N-1):
             if i < m+1:
                 a_coeff[i] = a_b_E_coeff[i]
             else:
                 b_coeff[i-m] = a_b_E_coeff[i]
-                #print(b_coeff[i-m])
 
         b_coeff[0] = 1 
-        #print(a_coeff,' ', b_coeff)
 
         def rat_res(a_coeff, b_coeff, x):
             a = 0
@@ -140,15 +128,14 @@ def Rat_Remez(m, n, formula, x_equiv=None):
             return a/b
 
         xnew = np.linspace(a, b, 1000)
-        y_func = [func(i, formula) for i in xnew]  # Значение функции
-        # Построение интерполянта Лагрнжа по n-1 точкам
+        y_func = [func(i, formula) for i in xnew]
+
         ynew = [rat_res(a_coeff, b_coeff, i) for i in xnew]
         y_diff = [rat_res(a_coeff, b_coeff, i)-func(i, formula)
-                    for i in xnew]  # Разница между Лагранжом и функцией
+                    for i in xnew]
         
         extremums_x = []
         extremums_y = []
-        # Поиск экстремумов
         s = pd.Series(y_diff)
         grp = s.groupby((np.sign(s).diff().fillna(0).ne(0)).cumsum())
         extremums_y_n = grp.apply(
@@ -167,7 +154,6 @@ def Rat_Remez(m, n, formula, x_equiv=None):
         for i in xnew:
             if rat_res(a_coeff, b_coeff,i)-func(i, formula) == extremums_y[it]:
                 extremums_x.append(i)
-                # print(it,' ',len(extremums_y),' ',extremums_y[it])
                 if it != (len(extremums_y)-1):
                     it += 1
                 else:
@@ -195,9 +181,9 @@ def Rat_Remez(m, n, formula, x_equiv=None):
                     y[i] = func(extremums_x[i], formula)
         else:
             for i in range(len(extremums_y)):
-                #  print(extremums_y[i],' ',max_E)
+
                 if math.fabs(extremums_y[i]) > abs(a_b_E_coeff[-1]):
-                    #print(extremums_x[i], ' ',x)
+
                     if extremums_x[i] not in x:
                         closest_x_index = closest(x, extremums_x[i])
                         x[closest_x_index] = extremums_x[i]
