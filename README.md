@@ -10,7 +10,7 @@
 * Базовый и комбинированный методы IRLS
 
 
-![1](images/1.jpg =250x)
+![1](images/1.jpg =100x20)
 ![1](images/2.jpg)
 ![1](images/3.jpg)
 ![1](images/4.jpg)
