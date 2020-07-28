@@ -1,6 +1,4 @@
 function [x, iter_n] = Basic_IRLS(A, b, p, KK)
-% KK - количество итераций, A - начальная матрица, b - значения
-% приближающей функции.
 if nargin < 4, KK =10; end;
 x = pinv(A)*b;
 E = [];
