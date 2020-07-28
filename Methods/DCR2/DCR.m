@@ -25,27 +25,27 @@ F21 = @(x) (100*pi*(x.^2-0.36))./(sinh(100*pi*(x.^2-0.36)));
 F22 = @(x) abs(x).*sqrt(abs(x));
 F23 = @(x) abs(x);
 F24 = @(x) tanh(50*x);
-%{
-Алгоритм DCR2. 
-1)	Принимает:
-    а)	 Приближаемую функцию, заданную дискретно:
-        	x  вектор-столбец, содержащий набор точек на интервале аппроксимации [-1, 1]; 
-        	y  вектор-строка, содержащий значения функции в точках вектора-столбца x;
-    Количество точек формируется исходя из введенных степеней m и n (m + n + 2); 
-    б)	 m и n  целые числа, обозначающие степени числителя и знаменателя приближающей функции.
 
-2)	Возвращает:
-    а)	Max_err  максимальное значение функции ошибки на интервале аппроксимации;
-    б)	График функции ошибки и график приближающей и приближаемой функции;
-    в)	a, b  коэффициенты полиномов числителя и знаменателя найденной приближающей функции;
-    г)	iter_n  количество итераций, совершенных методом.
+
+%{
+DCR2 method.
+1) Accepts:
+a) Approximate function, given discretely:
+Б─╒ x is a column vector containing a set of points on the approximation interval [-1, 1];
+Б─╒ y is a row vector containing the values of the function at the points of the column vector x;
+The number of points is formed based on the entered degrees m and n (m + n + 2);
+b) m and n are integers denoting the degrees of the numerator and denominator of the approximating function.
+
+2) Returns:
+a) Max_err is the maximum value of the error function on the approximation interval;
+b) The graph of the error function and the graph of the approaching and approximating function;
+c) a, b are the coefficients of the polynomials of the numerator and denominator of the found approximating function;
+d) iter_n - the number of iterations performed by the method.
 %}
 
-% Степени числителя и знаменателя приближающей функции. 
 m = 17; n = 3;
 f = @(x) tanh(50*x);
 
-% Инициализация узлов интерполяции. 
 x = linspace(-1,1,m+n+2)';
 z = linspace(-1,1,2001)';
 y = f(x);
@@ -67,8 +67,7 @@ TpowersN = zeros(length(x), m+1);
              TpowersD(i,j) = x(i)^(j-1);
         end
      end
-    
-    % Поиск начального приближения. 
+     
     cvx_begin
         cvx_quiet(true);
         variable a(m+1);
@@ -83,14 +82,12 @@ TpowersN = zeros(length(x), m+1);
     bPrev = b;
     r_val = [];
     
-    % Вычисление приближающей функции.
     for i = 1:length(z)
         r_val = [r_val; r_res(z(i), aPrev, bPrev)];
     end
     
     err_func = r_val - y_z;
     
-    %Вычисление минимаксной ошибки. 
     [ymax,imax,ymin,imin] = extrema(err_func);
     if max(ymax) - min(ymax) > (max(abs(ymin)) - min(abs(ymin)))
         mmErrors = [mmErrors;  max(ymax) - min(ymax)];
@@ -160,8 +157,7 @@ while error_abs > 10e-15 & stopDCR < 35
      imin = [];
      ymax = [];
      ymin = [];
-    
-    % Поиск экстремумов функции ошибки. 
+     
     [ymax,imax,ymin,imin] = extrema(err_func);
     if max(ymax) - min(ymax) > (max(abs(ymin)) - min(abs(ymin)))
         mmErrors = [mmErrors;  max(ymax) - min(ymax)];
@@ -169,7 +165,6 @@ while error_abs > 10e-15 & stopDCR < 35
         mmErrors = [mmErrors; (max(abs(ymin)) - min(abs(ymin)))];
     end
     
-     % Замена узлов интерполяции. 
      checkX = cat(1,z(imax),z(imin));
      checkX = sort(checkX);
      checkY = [];
@@ -187,17 +182,14 @@ while error_abs > 10e-15 & stopDCR < 35
      min_max_rev = [min_max_rev; abs(min_min)/(max_max) - 1]; 
      error_abs = abs(min_min - max_max);
 
-end
-  % График функции ошибки. 
+end 
   figure
   plot(z, err_func)
   legend('err function')
   grid on
   
   
-% Время выполнения.
 Ex_time = toc;  
-% Максимальное отклонение. 
 disp([max(r_valNew - y_z)]);
 iter_n
 a, b
